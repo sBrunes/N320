@@ -157,11 +157,109 @@ class WinCheck
         //check diagonal
         //forward slash
         //for each row
-        for(let i = 6; i > -1; i--)
+        for(let i = 3; i < 7; i++)
         {
-            for(let k = 0; k < 7; k++)
+            //for each spot in each row
+            for(let k = 0; k < 4; k++)
             {
-                
+                if(i == 6 && k == 0)
+                {
+                    keepGoing = true;
+                    console.log("currCOlor: " + currColor);
+                    console.log(this.GameboardInstance.occupation[i][k]);
+
+                    for(let p = 0; p < 4; p++)
+                    {
+                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
+                        {
+                            console.log(this.GameboardInstance.occupation[i - p][k + p] + "  p = " + p);
+                        } else {
+                            keepGoing = false;
+                        }
+                    }
+                }
+                //Check the four to the bottom left
+                if(this.GameboardInstance.occupation[i][k] != -1)
+                {
+                    numInRow = 0;
+                    keepGoing = true;
+                    currColor = this.GameboardInstance.occupation[i][k];
+
+                    for(let p = 0; p < 4; p++)
+                    {
+                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
+                        {
+                            numInRow++;
+
+                            if(!playerWon)
+                            {
+                                playerWon = this.WinCondition(numInRow);
+                            }
+
+                            if(i == 6 && k == 0)
+                            {
+                                console.log("Num in row: " + numInRow);
+                                console.log("Player won? " + playerWon);
+                            }
+                        } else {
+                            keepGoing = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        //back slash
+        //for each row
+        for(let i = 0; i < 4; i++)
+        {
+            //for each spot in each row
+            for(let k = 0; k < 4; k++)
+            {
+                if(i == 6 && k == 0)
+                {
+                    keepGoing = true;
+                    console.log("currCOlor: " + currColor);
+                    console.log(this.GameboardInstance.occupation[i][k]);
+
+                    for(let p = 0; p < 4; p++)
+                    {
+                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
+                        {
+                            console.log(this.GameboardInstance.occupation[i - p][k + p] + "  p = " + p);
+                        } else {
+                            keepGoing = false;
+                        }
+                    }
+                }
+                //Check the four to the bottom left
+                if(this.GameboardInstance.occupation[i][k] != -1)
+                {
+                    numInRow = 0;
+                    keepGoing = true;
+                    currColor = this.GameboardInstance.occupation[i][k];
+
+                    for(let p = 0; p < 4; p++)
+                    {
+                        if(keepGoing && this.GameboardInstance.occupation[i + p][k + p] == currColor)
+                        {
+                            numInRow++;
+
+                            if(!playerWon)
+                            {
+                                playerWon = this.WinCondition(numInRow);
+                            }
+
+                            if(i == 6 && k == 0)
+                            {
+                                console.log("Num in row: " + numInRow);
+                                console.log("Player won? " + playerWon);
+                            }
+                        } else {
+                            keepGoing = false;
+                        }
+                    }
+                }
             }
         }
 
