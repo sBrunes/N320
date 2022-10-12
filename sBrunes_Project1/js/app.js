@@ -25,6 +25,8 @@ class Gameboard
 
     WinCheckManager;
 
+    animManager;
+
     playerWon = false;
 
     constructor()
@@ -68,6 +70,8 @@ class Gameboard
             this.tokens[this.currentToken].setAttribute("cy", this.positions[1][y]);
 
             this.occupation[x][y] = this.playerTurn;
+
+            this.animManager.DropToken(this.tokens[this.currentToken]);
 
             this.currentToken++;
         
@@ -284,9 +288,25 @@ class WinCheck
 
 class AnimationManager
 {
-
+    DropToken(token)
+    {
+        let tween = gsap.from(token, {
+            duration: .5,
+            ease: "bounce.out",
+            cy: 0,
+            paused: true
+        });
+        
+        tween.play();
+        
+        //TweenMax.from(token, {duration: 10, cy: 0});
+        console.log(token);
+        //token.setAttribute("cx", 0);
+    }
 }
 
 let myGameboard = new Gameboard();
 let gameWinManager = new WinCheck(myGameboard);
+let animManager = new AnimationManager();
 myGameboard.WinCheckManager = gameWinManager;
+myGameboard.animManager = animManager;

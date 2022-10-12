@@ -1,4 +1,24 @@
 .holder {
+    padding-top: 10px;
     width: 600px;
     height: 600px;
+}
+
+.AnounceBox {
+    width: 600px;
+    height: 100px;
+    background-color: brown;
+}
+
+.TextHolder {
+    /* background-color: green; */
+    padding: 20px;
+}
+
+.aText {
+    text-align: center;
+    font-size: 40px;
+    margin: auto;
+    width: 100%;
+    color:blue;
 }
