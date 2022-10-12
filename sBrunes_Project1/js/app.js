@@ -78,6 +78,8 @@ class Gameboard
             this.playerTurn = (this.playerTurn == 0) ? 1 : 0;
 
             this.WinCheckManager.checkWin();
+
+            this.animManager.ChangeTurn(this.playerTurn);
         }
     }
 }
@@ -288,6 +290,15 @@ class WinCheck
 
 class AnimationManager
 {
+    announcementText;
+    announceBox;
+
+    constructor(announcementText, announceBox)
+    {
+        this.announcementText = announcementText;
+        this.announceBox = announceBox;
+    }
+
     DropToken(token)
     {
         let tween = gsap.from(token, {
@@ -303,10 +314,21 @@ class AnimationManager
         console.log(token);
         //token.setAttribute("cx", 0);
     }
+
+    ChangeTurn(newTurn)
+    {
+        let newText = (newTurn == 0) ? "Red's turn" : "Blue's turn";
+        let newTextColor = (newTurn == 0) ? "#d10011" : "#0010bd";
+        let newBoxColor = (newTurn == 0) ? "#ffb0b0" : "#a6adff";
+
+        this.announcementText.innerHTML = newText;
+        this.announcementText.style.color = newTextColor;
+        this.announceBox.style.backgroundColor = newBoxColor;
+    }
 }
 
 let myGameboard = new Gameboard();
 let gameWinManager = new WinCheck(myGameboard);
-let animManager = new AnimationManager();
+let animManager = new AnimationManager(document.getElementById('announceText'), document.getElementById('announceBox'));
 myGameboard.WinCheckManager = gameWinManager;
 myGameboard.animManager = animManager;
