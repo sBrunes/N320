@@ -88,7 +88,8 @@ class Gameboard
         
             this.playerTurn = (this.playerTurn == 0) ? 1 : 0;
 
-            this.animManager.ChangeTurn(this.playerTurn, this.WinCheckManager.checkWin());
+            this.animManager.ChangeTurn(this.playerTurn, this.WinCheckManager.checkWin(), this.WinCheckManager.winningSpots);
+                            
         }
     }
 }
@@ -97,11 +98,13 @@ class WinCheck
 {
     GameboardInstance;
     animManager;
+    winningSpots;
 
     constructor(GameboardInstance, animManager)
     {
         this.GameboardInstance = GameboardInstance;
         this.animManager = animManager;
+        this.winningSpots = [null, null, null, null];
     }
 
     checkWin()
@@ -124,26 +127,36 @@ class WinCheck
                 {
                     if(this.GameboardInstance.occupation[i][k] != null)
                     {
-                        if(this.GameboardInstance.occupation[i][k].getAttribute("val") != currColor)
+                        if(this.GameboardInstance.occupation[i][k].getAttribute('val') != currColor)
                         {
                             numInRow = 1;
 
-                            currColor = this.GameboardInstance.occupation[i][k];
+                            currColor = this.GameboardInstance.occupation[i][k].getAttribute('val');
                         } else {
-                            if(this.GameboardInstance.occupation[i][k] != -1)
-                            {
-                                numInRow++;
+                            numInRow++;
 
-                                playerWon = this.WinCondition(numInRow);
-                            } else {
-                                numInRow = 0;
+                            playerWon = this.WinCondition(numInRow);
+
+                            if(playerWon)
+                            {
+                                console.log(this.winningSpots)
+
+                                this.winningSpots = [
+                                    this.GameboardInstance.occupation[i][k],
+                                    this.GameboardInstance.occupation[i][k - 1],
+                                    this.GameboardInstance.occupation[i][k - 2],
+                                    this.GameboardInstance.occupation[i][k - 3]
+                                ];
                             }
                         }
+                    } else {
+                        numInRow = 0;
+                        // winSpotIndex = 0;
                     }
                 }
             }
         }
-
+        
         //check horizontal win
 
         //for each row
@@ -155,21 +168,31 @@ class WinCheck
             {
                 if(!playerWon)
                 {
-                    if(this.GameboardInstance.occupation[k][i] != currColor && this.GameboardInstance.occupation[k][i] != -1)
+                    if(this.GameboardInstance.occupation[k][i] != null)
                     {
-                        numInRow = 1;
-
-                        currColor = this.GameboardInstance.occupation[k][i];
-                    } else {
-                        if(this.GameboardInstance.occupation[k][i] != -1)
+                        if(this.GameboardInstance.occupation[k][i].getAttribute('val') != currColor)
                         {
+                            numInRow = 1;
+
+                            currColor = this.GameboardInstance.occupation[k][i].getAttribute('val');
+                        } else {
                             numInRow++;
 
                             playerWon = this.WinCondition(numInRow);
-                        } else {
-                            numInRow = 0;
+
+                            if(playerWon)
+                            {
+                                this.winningSpots = [
+                                    this.GameboardInstance.occupation[k][i],
+                                    this.GameboardInstance.occupation[k - 1][i],
+                                    this.GameboardInstance.occupation[k - 2][i],
+                                    this.GameboardInstance.occupation[k - 3][i]
+                                ];
+                            }
                         }
-                    } 
+                    } else {
+                        numInRow = 0;
+                    }
                 }
             }
         }
@@ -182,44 +205,34 @@ class WinCheck
             //for each spot in each row
             for(let k = 0; k < 4; k++)
             {
-                if(i == 6 && k == 0)
-                {
-                    keepGoing = true;
-                    console.log("currCOlor: " + currColor);
-                    console.log(this.GameboardInstance.occupation[i][k]);
-
-                    for(let p = 0; p < 4; p++)
-                    {
-                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
-                        {
-                            console.log(this.GameboardInstance.occupation[i - p][k + p] + "  p = " + p);
-                        } else {
-                            keepGoing = false;
-                        }
-                    }
-                }
                 //Check the four to the bottom left
-                if(this.GameboardInstance.occupation[i][k] != -1)
+                if(this.GameboardInstance.occupation[i][k] != null && !playerWon)
                 {
                     numInRow = 0;
                     keepGoing = true;
-                    currColor = this.GameboardInstance.occupation[i][k];
+                    currColor = this.GameboardInstance.occupation[i][k].getAttribute('val');
 
                     for(let p = 0; p < 4; p++)
                     {
-                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
+                        if(this.GameboardInstance.occupation[i - p][k + p] != null)
                         {
-                            numInRow++;
-
-                            if(!playerWon)
+                            if(keepGoing && this.GameboardInstance.occupation[i - p][k + p].getAttribute('val') == currColor)
                             {
+                                numInRow++;
+
                                 playerWon = this.WinCondition(numInRow);
-                            }
 
-                            if(i == 6 && k == 0)
-                            {
-                                console.log("Num in row: " + numInRow);
-                                console.log("Player won? " + playerWon);
+                                if(playerWon)
+                                {
+                                    this.winningSpots = [
+                                        this.GameboardInstance.occupation[i][k],
+                                        this.GameboardInstance.occupation[i - 1][k + 1],
+                                        this.GameboardInstance.occupation[i - 2][k + 2],
+                                        this.GameboardInstance.occupation[i - 3][k + 3]
+                                    ];
+                                }
+                            } else {
+                                keepGoing = false;
                             }
                         } else {
                             keepGoing = false;
@@ -236,44 +249,34 @@ class WinCheck
             //for each spot in each row
             for(let k = 0; k < 4; k++)
             {
-                if(i == 6 && k == 0)
-                {
-                    keepGoing = true;
-                    console.log("currCOlor: " + currColor);
-                    console.log(this.GameboardInstance.occupation[i][k]);
-
-                    for(let p = 0; p < 4; p++)
-                    {
-                        if(keepGoing && this.GameboardInstance.occupation[i - p][k + p] == currColor)
-                        {
-                            console.log(this.GameboardInstance.occupation[i - p][k + p] + "  p = " + p);
-                        } else {
-                            keepGoing = false;
-                        }
-                    }
-                }
                 //Check the four to the bottom left
-                if(this.GameboardInstance.occupation[i][k] != -1)
+                if(this.GameboardInstance.occupation[i][k] != null && !playerWon)
                 {
                     numInRow = 0;
                     keepGoing = true;
-                    currColor = this.GameboardInstance.occupation[i][k];
+                    currColor = this.GameboardInstance.occupation[i][k].getAttribute('val');
 
                     for(let p = 0; p < 4; p++)
                     {
-                        if(keepGoing && this.GameboardInstance.occupation[i + p][k + p] == currColor)
+                        if(this.GameboardInstance.occupation[i + p][k + p] != null)
                         {
-                            numInRow++;
-
-                            if(!playerWon)
+                            if(keepGoing && this.GameboardInstance.occupation[i + p][k + p].getAttribute('val') == currColor)
                             {
+                                numInRow++;
+
                                 playerWon = this.WinCondition(numInRow);
-                            }
 
-                            if(i == 6 && k == 0)
-                            {
-                                console.log("Num in row: " + numInRow);
-                                console.log("Player won? " + playerWon);
+                                if(playerWon)
+                                {
+                                    this.winningSpots = [
+                                        this.GameboardInstance.occupation[i][k],
+                                        this.GameboardInstance.occupation[i + 1][k + 1],
+                                        this.GameboardInstance.occupation[i + 2][k + 2],
+                                        this.GameboardInstance.occupation[i + 3][k + 3]
+                                    ];
+                                }
+                            } else {
+                                keepGoing = false;
                             }
                         } else {
                             keepGoing = false;
@@ -284,6 +287,7 @@ class WinCheck
         }
 
         this.GameboardInstance.playerWon = playerWon;
+        console.log(this.winningSpots[0]);
 
         if(playerWon)
         {
@@ -325,13 +329,9 @@ class AnimationManager
         });
         
         tween.play();
-        
-        //TweenMax.from(token, {duration: 10, cy: 0});
-        console.log(token);
-        //token.setAttribute("cx", 0);
     }
 
-    ChangeTurn(newTurn, playerWon)
+    ChangeTurn(newTurn, playerWon, winningSpots)
     {
         let newText;
         let newTextColor;
@@ -342,6 +342,18 @@ class AnimationManager
             newTurn = (newTurn == 0) ? 1 : 0;
 
             newText = (newTurn == 0) ? "Red has won!" : "Blue has won!";
+
+            console.log(winningSpots);
+
+            for(let i = 0; i < 4; i++)
+            {
+                console.log(winningSpots[i]);
+
+                winningSpots[i].setAttribute("r", 70);
+
+                winningSpots[i].style.stroke = "#46eb34";
+                winningSpots[i].style.strokeWidth = "50px";
+            }
         } else {
             newText = (newTurn == 0) ? "Red's turn" : "Blue's turn";
         }

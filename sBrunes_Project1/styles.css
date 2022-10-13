@@ -28,3 +28,27 @@
     color:#d10011;
     font-family: "CasinoFont";
 }
+
+.resetButtonDIV {
+    padding-top: 100px;
+    width: 600px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+}
+
+.resetButton {
+    width: 300px;
+    font-family: "CasinoFont";
+    font-size: 30px;
+    color: #6500c4;
+    background-color: #8465a1;
+}
+
+.resetButton:active {
+    width: 300px;
+    font-family: "CasinoFont";
+    font-size: 30px;
+    color: #6500c4;
+    background-color: #493759;
+}
