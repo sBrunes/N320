@@ -75,7 +75,7 @@ class Gameboard
             this.tokens[this.currentToken].style.fill = fillColor;
             
             this.tokens[this.currentToken].setAttribute("cx", this.positions[0][x]);
-            //this.tokens[this.currentToken].setAttribute("cy", this.positions[1][y]);
+            this.tokens[this.currentToken].setAttribute("cy", -150);
             this.tokens[this.currentToken].setAttribute("val", this.playerTurn);
 
             //occupies the space in the occupation array with the token object reference
