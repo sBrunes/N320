@@ -6,14 +6,24 @@ class Gameboard
     ];
 
     //vacancy for each position on the board
+    // occupation = [
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    //     [-1, -1, -1, -1, -1, -1, -1],
+    // ];
+
     occupation = [
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
     ];
 
     playerTurn = 0;
@@ -46,7 +56,7 @@ class Gameboard
         {
             if(!spotFound)
             {
-                if(this.occupation[x][i] > -1)
+                if(this.occupation[x][i] != null)
                 {
                     y = i - 1;
                     spotFound = true;
@@ -59,7 +69,7 @@ class Gameboard
         //animate the thingy
 
 
-        if(this.occupation[x][0] == -1)
+        if(this.occupation[x][0] == null)
         {
             //select the correct color and assign a team
             let fillColor = (this.playerTurn == 0) ? "#fc031c" : "#0000ff";
@@ -68,8 +78,9 @@ class Gameboard
             
             this.tokens[this.currentToken].setAttribute("cx", this.positions[0][x]);
             this.tokens[this.currentToken].setAttribute("cy", this.positions[1][y]);
+            this.tokens[this.currentToken].setAttribute("val", this.playerTurn);
 
-            this.occupation[x][y] = this.playerTurn;
+            this.occupation[x][y] = this.tokens[this.currentToken];
 
             this.animManager.DropToken(this.tokens[this.currentToken]);
 
@@ -77,9 +88,7 @@ class Gameboard
         
             this.playerTurn = (this.playerTurn == 0) ? 1 : 0;
 
-            this.WinCheckManager.checkWin();
-
-            this.animManager.ChangeTurn(this.playerTurn);
+            this.animManager.ChangeTurn(this.playerTurn, this.WinCheckManager.checkWin());
         }
     }
 }
@@ -87,10 +96,12 @@ class Gameboard
 class WinCheck
 {
     GameboardInstance;
+    animManager;
 
-    constructor(GameboardInstance)
+    constructor(GameboardInstance, animManager)
     {
         this.GameboardInstance = GameboardInstance;
+        this.animManager = animManager;
     }
 
     checkWin()
@@ -111,19 +122,22 @@ class WinCheck
             {
                 if(!playerWon)
                 {
-                    if(this.GameboardInstance.occupation[i][k] != currColor && this.GameboardInstance.occupation[i][k] != -1)
+                    if(this.GameboardInstance.occupation[i][k] != null)
                     {
-                        numInRow = 1;
-
-                        currColor = this.GameboardInstance.occupation[i][k];
-                    } else {
-                        if(this.GameboardInstance.occupation[i][k] != -1)
+                        if(this.GameboardInstance.occupation[i][k].getAttribute("val") != currColor)
                         {
-                            numInRow++;
+                            numInRow = 1;
 
-                            playerWon = this.WinCondition(numInRow);
+                            currColor = this.GameboardInstance.occupation[i][k];
                         } else {
-                            numInRow = 0;
+                            if(this.GameboardInstance.occupation[i][k] != -1)
+                            {
+                                numInRow++;
+
+                                playerWon = this.WinCondition(numInRow);
+                            } else {
+                                numInRow = 0;
+                            }
                         }
                     }
                 }
@@ -273,7 +287,9 @@ class WinCheck
 
         if(playerWon)
         {
-            console.log("Player " + currColor + "won!");
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -315,11 +331,23 @@ class AnimationManager
         //token.setAttribute("cx", 0);
     }
 
-    ChangeTurn(newTurn)
+    ChangeTurn(newTurn, playerWon)
     {
-        let newText = (newTurn == 0) ? "Red's turn" : "Blue's turn";
-        let newTextColor = (newTurn == 0) ? "#d10011" : "#0010bd";
-        let newBoxColor = (newTurn == 0) ? "#ffb0b0" : "#a6adff";
+        let newText;
+        let newTextColor;
+        let newBoxColor;
+
+        if(playerWon)
+        {
+            newTurn = (newTurn == 0) ? 1 : 0;
+
+            newText = (newTurn == 0) ? "Red has won!" : "Blue has won!";
+        } else {
+            newText = (newTurn == 0) ? "Red's turn" : "Blue's turn";
+        }
+
+        newTextColor = (newTurn == 0) ? "#d10011" : "#0010bd";
+        newBoxColor = (newTurn == 0) ? "#ffb0b0" : "#a6adff";
 
         this.announcementText.innerHTML = newText;
         this.announcementText.style.color = newTextColor;
@@ -328,7 +356,7 @@ class AnimationManager
 }
 
 let myGameboard = new Gameboard();
-let gameWinManager = new WinCheck(myGameboard);
 let animManager = new AnimationManager(document.getElementById('announceText'), document.getElementById('announceBox'));
+let gameWinManager = new WinCheck(myGameboard, animManager);
 myGameboard.WinCheckManager = gameWinManager;
 myGameboard.animManager = animManager;
