@@ -1,21 +1,13 @@
+//gameboard / game manager class
 class Gameboard
 {
+    //positions for each column (x) and row (y) positions
     positions = [
         [148, 332, 516, 694, 884, 1068, 1246], //x positions  
         [313.24, 500.24, 686.24, 872.24, 1058.24, 1244.24, 1430.24] //y positions
     ];
 
-    //vacancy for each position on the board
-    // occupation = [
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    //     [-1, -1, -1, -1, -1, -1, -1],
-    // ];
-
+    //occupancy of the board
     occupation = [
         [null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null],
@@ -26,23 +18,30 @@ class Gameboard
         [null, null, null, null, null, null, null],
     ];
 
+    //current player turn
     playerTurn = 0;
     
     //the index of the current token to be used out of the pool
     currentToken = 0;
 
+    //token objects from document
     tokens = document.getElementsByClassName("cls-1");
 
+    //wincheck class instance
     WinCheckManager;
 
+    //animation manager isntance
     animManager;
 
+    //if the player has won
     playerWon = false;
 
+    //constructor
     constructor()
     {
     }
 
+    //Adds a token to the designated slot
     AddToken(value)
     {
         //prevents new tokens from being placed if a player has won
@@ -52,6 +51,7 @@ class Gameboard
         let y = -1;
         let spotFound = false;
 
+        //finds the next available spot in the column
         for(let i = 0; i < 7; i++)
         {
             if(!spotFound)
@@ -66,9 +66,7 @@ class Gameboard
             }
         }
 
-        //animate the thingy
-
-
+        //if there are no tokens in the column
         if(this.occupation[x][0] == null)
         {
             //select the correct color and assign a team
@@ -77,29 +75,80 @@ class Gameboard
             this.tokens[this.currentToken].style.fill = fillColor;
             
             this.tokens[this.currentToken].setAttribute("cx", this.positions[0][x]);
-            this.tokens[this.currentToken].setAttribute("cy", this.positions[1][y]);
+            //this.tokens[this.currentToken].setAttribute("cy", this.positions[1][y]);
             this.tokens[this.currentToken].setAttribute("val", this.playerTurn);
 
+            //occupies the space in the occupation array with the token object reference
             this.occupation[x][y] = this.tokens[this.currentToken];
 
-            this.animManager.DropToken(this.tokens[this.currentToken]);
+            //drops the token in the animation manager with the target y position
+            this.animManager.DropToken(this.tokens[this.currentToken], this.positions[1][y]);
 
+            //increment token pool index
             this.currentToken++;
         
+            //current player turn decision
             this.playerTurn = (this.playerTurn == 0) ? 1 : 0;
 
-            this.animManager.ChangeTurn(this.playerTurn, this.WinCheckManager.checkWin(), this.WinCheckManager.winningSpots);
-                            
+            //checks for a win, and changes the banner and text based on the turn
+            this.animManager.ChangeTurn(this.playerTurn, this.WinCheckManager.checkWin(), this.WinCheckManager.winningSpots);          
+        }
+    }
+
+    //resets the board and variables
+    ResetBoard()
+    {
+        //for each column
+        for(let i = 0; i < 7; i++)
+        {
+            //for each row
+            for(let k = 0; k < 7; k++)
+            {
+                //if it's not null
+                if(this.occupation[i][k] != null)
+                {
+                    //move that token back to the top
+                    this.animManager.MoveTokenBack(this.occupation[i][k]);
+                }
+            }
+        }
+        
+        //reset variables to defualt values
+        this.currentToken = 0;
+        this.playerWon = false;
+        this.playerTurn = 0;
+        this.occupation = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+
+        //reset the banner to say which turn it is
+        this.animManager.ResetBanner();
+
+        //resets the stroke of the winning tokens
+        for(let i = 0; i < 4; i++)
+        {
+            this.WinCheckManager.winningSpots[i].setAttribute("r", 89);
+
+            this.WinCheckManager.winningSpots[i].style.strokeOpacity = 0;
         }
     }
 }
 
+//class to handle win condition checks
 class WinCheck
 {
+    //class instance variables
     GameboardInstance;
     animManager;
     winningSpots;
 
+    //sets class instance references
     constructor(GameboardInstance, animManager)
     {
         this.GameboardInstance = GameboardInstance;
@@ -107,8 +156,10 @@ class WinCheck
         this.winningSpots = [null, null, null, null];
     }
 
+    //checks for a win
     checkWin()
     {
+        //variables
         let numInRow = 0;
         let currColor = 0;
         let playerWon = false
@@ -123,24 +174,30 @@ class WinCheck
             //for each spot in the row
             for(let k = 0; k < 7; k++)
             {
+                //if a player has not won yet
                 if(!playerWon)
                 {
+                    //if the spot has a token in it
                     if(this.GameboardInstance.occupation[i][k] != null)
                     {
+                        //if the current token doesnt match the previous token
                         if(this.GameboardInstance.occupation[i][k].getAttribute('val') != currColor)
                         {
+                            //reset num in row to 1
                             numInRow = 1;
-
+                            
+                            //change current color
                             currColor = this.GameboardInstance.occupation[i][k].getAttribute('val');
                         } else {
+                            //increment number in a row
                             numInRow++;
 
+                            //checks for if player has 4
                             playerWon = this.WinCondition(numInRow);
 
                             if(playerWon)
                             {
-                                console.log(this.winningSpots)
-
+                                //sets the winning tokens
                                 this.winningSpots = [
                                     this.GameboardInstance.occupation[i][k],
                                     this.GameboardInstance.occupation[i][k - 1],
@@ -151,7 +208,6 @@ class WinCheck
                         }
                     } else {
                         numInRow = 0;
-                        // winSpotIndex = 0;
                     }
                 }
             }
@@ -166,20 +222,28 @@ class WinCheck
             //for each spot in the row
             for(let k = 0; k < 7; k++)
             {
+                //if a player has not won yet
                 if(!playerWon)
                 {
+                    //if it's not null
                     if(this.GameboardInstance.occupation[k][i] != null)
                     {
+                        //if it's a different color from the previous piece
                         if(this.GameboardInstance.occupation[k][i].getAttribute('val') != currColor)
                         {
+                            //reset num in row
                             numInRow = 1;
 
+                            //change current clor
                             currColor = this.GameboardInstance.occupation[k][i].getAttribute('val');
                         } else {
+                            //incremenet num in row
                             numInRow++;
 
+                            //check for if player has won
                             playerWon = this.WinCondition(numInRow);
 
+                            //set winning spots
                             if(playerWon)
                             {
                                 this.winningSpots = [
@@ -212,6 +276,7 @@ class WinCheck
                     keepGoing = true;
                     currColor = this.GameboardInstance.occupation[i][k].getAttribute('val');
 
+                    //for each possible piece, if it's not null, chick the four pieces to the bottom left to see if they all match
                     for(let p = 0; p < 4; p++)
                     {
                         if(this.GameboardInstance.occupation[i - p][k + p] != null)
@@ -220,8 +285,10 @@ class WinCheck
                             {
                                 numInRow++;
 
+                                //check if player has won
                                 playerWon = this.WinCondition(numInRow);
 
+                                //set winning pieces
                                 if(playerWon)
                                 {
                                     this.winningSpots = [
@@ -250,6 +317,7 @@ class WinCheck
             for(let k = 0; k < 4; k++)
             {
                 //Check the four to the bottom left
+                //for each possible piece, if it's not null, chick the four pieces to the bottom right to see if they all match
                 if(this.GameboardInstance.occupation[i][k] != null && !playerWon)
                 {
                     numInRow = 0;
@@ -260,12 +328,15 @@ class WinCheck
                     {
                         if(this.GameboardInstance.occupation[i + p][k + p] != null)
                         {
+                            //if the next piece matches
                             if(keepGoing && this.GameboardInstance.occupation[i + p][k + p].getAttribute('val') == currColor)
                             {
                                 numInRow++;
 
+                                //check if win
                                 playerWon = this.WinCondition(numInRow);
 
+                                //set winning pieces
                                 if(playerWon)
                                 {
                                     this.winningSpots = [
@@ -286,9 +357,10 @@ class WinCheck
             }
         }
 
+        //set it in gameboard instance
         this.GameboardInstance.playerWon = playerWon;
-        console.log(this.winningSpots[0]);
 
+        //return true if a player won, and false if not
         if(playerWon)
         {
             return true;
@@ -297,6 +369,7 @@ class WinCheck
         }
     }
 
+    //checks if a player has four
     WinCondition(numInRow)
     {
         if(numInRow == 4)
@@ -308,67 +381,98 @@ class WinCheck
     }
 }
 
+//class to handle animation
 class AnimationManager
 {
     announcementText;
     announceBox;
 
+    //sets the document element variables
     constructor(announcementText, announceBox)
     {
         this.announcementText = announcementText;
         this.announceBox = announceBox;
     }
 
-    DropToken(token)
+    //drops a token to the target cy location
+    DropToken(token, target)
     {
-        let tween = gsap.from(token, {
+        let tween = gsap.to(token, {
             duration: .5,
             ease: "bounce.out",
-            cy: 0,
+            cy: target,
             paused: true
         });
-        
+
         tween.play();
     }
 
+    //changes the banner color and text
     ChangeTurn(newTurn, playerWon, winningSpots)
     {
         let newText;
         let newTextColor;
         let newBoxColor;
 
+        //if a player has won
         if(playerWon)
         {
             newTurn = (newTurn == 0) ? 1 : 0;
 
+            //show which player won
             newText = (newTurn == 0) ? "Red has won!" : "Blue has won!";
 
-            console.log(winningSpots);
-
+            //mark the winning pieces with a green outline
             for(let i = 0; i < 4; i++)
             {
-                console.log(winningSpots[i]);
-
                 winningSpots[i].setAttribute("r", 70);
 
                 winningSpots[i].style.stroke = "#46eb34";
+                winningSpots[i].style.strokeOpacity = 1;
                 winningSpots[i].style.strokeWidth = "50px";
             }
         } else {
+            //set banner text to next players turn
             newText = (newTurn == 0) ? "Red's turn" : "Blue's turn";
         }
 
+        //set banner background color
         newTextColor = (newTurn == 0) ? "#d10011" : "#0010bd";
         newBoxColor = (newTurn == 0) ? "#ffb0b0" : "#a6adff";
 
+        //set the stuff
         this.announcementText.innerHTML = newText;
         this.announcementText.style.color = newTextColor;
         this.announceBox.style.backgroundColor = newBoxColor;
     }
+
+    //moves a token back to the top after the board is reset
+    MoveTokenBack(token)
+    {
+        let tween = gsap.to(token, {
+            duration: .5,
+            ease: "power1.in",
+            cy: -150,
+            paused: true
+        });
+
+        tween.play();
+    }
+
+    //resets the banner to its default value
+    ResetBanner()
+    {
+        this.announcementText.innerHTML = "Red goes first";
+        this.announcementText.style.color = "#d10011";
+        this.announceBox.style.backgroundColor = "#ffb0b0";
+    }
 }
 
+//class instances
 let myGameboard = new Gameboard();
 let animManager = new AnimationManager(document.getElementById('announceText'), document.getElementById('announceBox'));
 let gameWinManager = new WinCheck(myGameboard, animManager);
+
+//sets instance references in two managers
 myGameboard.WinCheckManager = gameWinManager;
 myGameboard.animManager = animManager;
