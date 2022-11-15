@@ -12,6 +12,8 @@ function calculateCost() {
     let sbox = document.getElementById("1");
     let ubox = document.getElementById("2");
 
+    document.getElementById("ed").innerHTML = "The minimum wage in the Bahamas is $5.25 an hour.";
+
     sbox.id = "salBox";
     ubox.id = "usBox";
 
@@ -27,7 +29,7 @@ function calculateCost() {
 
     let wage = parseFloat(t);
     let wage_grape = (Math.floor(wage / 12)).toString();
-    let wage_bellpepper = (Math.floor(wage / 5.25)).toString();
+    let wage_bellpepper = (Math.floor(wage / 5)).toString();
     let wage_apple = (Math.floor(wage / 1)).toString();
 
     h.innerHTML = "For $" + wage.toString() + " in San Salvador you can buy:";
