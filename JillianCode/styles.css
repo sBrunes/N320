@@ -1,10 +1,27 @@
 #salBox {
-    background-color: blue;
+    background-color: #7b7ee3;
     padding-top: 40px;
     padding-bottom: 40px;
+    width: 350px;
+    text-align: center;
 }
 #usBox {
-    background-color: red;
+    background-color: #ff7878;
     padding-top: 40px;
     padding-bottom: 40px;
+    width: 350px;
+    text-align: center;
+}
+.or {
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.text {
+    color: white;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.text2 {
+    font-size: 20px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
